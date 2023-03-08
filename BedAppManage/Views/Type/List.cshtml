@@ -1,0 +1,127 @@
+﻿
+@{
+    ViewBag.Title = "List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<table id="demo" lay-filter="test" ></table>
+
+
+<!-- 注意：如果你直接复制所有代码到本地，上述 JS 路径需要改成你本地的 -->
+<script>
+    var myMsg = layer.msg("加载中...", {
+        icon: 16,
+        time: -1
+    })
+
+
+    layui.use('table', function () {
+        var table = layui.table;
+
+        //执行渲染
+        table.render({
+            elem: '#demo' //指定原始表格元素选择器（推荐id选择器）
+            , url: "/Type/ListData"
+            , toolbar: 'default'
+            , page: true
+            , height:'full-70'
+            , cols: [[ //标题栏
+                { checkbox: true }
+                , { field: 'id', title: 'No', width: 80, type: 'numbers' }
+                , { field: 'no', title: 'ID', width: 80, style: 'display:none;' }
+                , { field: 'img', title: '缩略图', width: 120, align: 'center', templet: '#tempImg' }
+                , { field: 'name', title: '名称', width: 200, align: 'center' }
+            ]]
+            , parseData: function (res) { //res 即为原始返回的数据
+                layer.close(myMsg);//手动关闭
+                res = JSON.parse(res._DATA);
+                return {
+                    "code": 0, //解析接口状态
+                    "msg": "", //解析提示文本
+                    "count": res.recordcount, //解析数据长度
+                    "data": res.data  //解析数据列表
+                };
+            }, done: function () {
+                $("[data-field='no']").css('display', 'none');
+            }
+
+        });
+
+
+        //触发事件
+        table.on('toolbar(test)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id);
+            var data = checkStatus.data; //选中的数据
+            switch (obj.event) {
+                case 'add':
+                    layer.open({
+                        title: '添加分类',
+                        type: 2,
+                        area: ['450px', '300px'],
+                        content: 'Add' //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['http://sentsin.com', 'no']
+                    });
+                    break;
+                case 'delete':
+                    if (data.length == 0) {
+                        layer.msg('请选中要删除的内容!');
+                    } else {
+                        layer.confirm('是否删除选中的内容？', {
+                            btn: ['否', '是'], //可以无限个按钮
+                            icon: 3,
+                            title: '提示'
+                        }, function (index, layero) {
+                            //按钮【按钮一】的回调
+                            layer.close(index)
+                        }, function (index) {
+                            $.ajax({
+                                url: 'Del',
+                                data: {
+                                    nos: JSON.stringify(data),
+                                },
+                                success: function (res) {
+                                    layer.msg(JSON.parse(res)._OP_NOTE);
+                                    table.reload('demo');
+                                }
+                            })
+                        });
+                        
+                    }
+                    break;
+                case 'update':
+                    if (data.length == 1) {
+                        var jsonStr = {
+                            no: data[0].no,
+                            img: data[0].img,
+                            name: data[0].name
+                        }
+                        layer.open({
+                            title: '修改分类',
+                            type: 2,
+                            area: ['450px', '300px'],
+                            content: 'Edit?JsonModel=' + encodeURI(JSON.stringify(jsonStr))  //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['http://sentsin.com', 'no']
+                        });
+
+                    } else {
+                        layer.msg('请选中一条内容进行编辑!');
+                    }
+                    break;
+            };
+        });
+
+    });
+
+
+</script>
+<style>
+    .hide {
+        display: none;
+    }
+
+    .layui-table-cell {
+        height: auto !important;
+    }
+</style>
+<script type="text/html" id="tempImg">
+    <img style="width:60px;height:40px !important;" class="{{d.img==''?'hide':''}}" src="{{d.img}}" />
+</script>
+

@@ -1,0 +1,419 @@
+﻿@using BedAppManage.Models
+@using System.Data
+@{
+    ViewBag.Title = "Add";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@{
+    var p = (GoodsInfo)ViewData["GoodsInfo"];
+    DataTable dt = (DataTable)ViewData["TypesList"];
+}
+
+<form class="layui-form" action="" lay-filter="example">
+    <div class="layui-form-item" style="margin-top:10px;">
+        <label class="layui-form-label">商品分类</label>
+        <div class="layui-input-block">
+            <select name="typeNo" lay-verify="required" lay-search="">
+                <option value="">请选择</option>
+                @foreach (DataRow dr in dt.Rows)
+                {
+                    <option value=@dr["no"]>@dr["name"]</option>
+                }
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">商品名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="name" value="@p.name" required lay-verify="required" maxlength="20" placeholder="请输入商品名称" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">指导价</label>
+        <div class="layui-input-block">
+            <input type="text" name="falsePrice" value="@p.falsePrice" maxlength="5" required lay-verify="number" placeholder="请输入指导价" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">现价</label>
+        <div class="layui-input-block">
+            <input type="text" name="price" value="@p.price" maxlength="5" required lay-verify="number" placeholder="请输入现价" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">图片1 </label>
+        <div style="display:flex;" class="layui-input-block">
+            <div style="position:relative;">
+                <button type="button" class="layui-btn upload" id="test1">
+                    <i class="layui-icon" style="color: #dfdfdf;font-size:38px;">&#xe624;</i>
+                </button>
+                <div id="imgs1">
+                    <img id="imgsrc1" src="@p.img1" />
+                    <i class="layui-icon layui-icon-refresh" id="ReloadImg1"></i>
+                </div>
+            </div>
+            <div style="margin-left: 15px; position: relative;">
+                <button type="button" class="layui-btn upload" id="test2">
+                    <i class="layui-icon" style="color: #dfdfdf;font-size:38px;">&#xe624;</i>
+                </button>
+                <div id="imgs2">
+                    <img id="imgsrc2" src="@p.img2" />
+                    <i class="layui-icon layui-icon-refresh" id="ReloadImg2" ></i>
+                </div>
+            </div>
+            <div style="margin-left: 15px; position: relative;">
+                <button type="button" class="layui-btn upload" id="test3">
+                    <i class="layui-icon" style="color: #dfdfdf;font-size:38px;">&#xe624;</i>
+                </button>
+                <div id="imgs3">
+                    <img id="imgsrc3" src="@p.img3" />
+                    <i class="layui-icon layui-icon-refresh" id="ReloadImg3"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn" lay-submit lay-filter="formDemo">提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+</form>
+<script>
+    if (@p.no== -1) {
+        $("#imgs1").hide();
+        $("#imgs2").hide();
+        $("#imgs3").hide();
+    } else {
+        if ('@p.img1' != '') {
+            $("#test1").hide();
+            $("#imgs1").show();
+        } else {
+            $("#test1").show();
+            $("#imgs1").hide();
+        }
+        if ('@p.img2' != '') {
+            $("#test2").hide();
+            $("#imgs2").show();
+        } else {
+            $("#test2").show();
+            $("#imgs2").hide();
+        }
+        if ('@p.img3' != '') {
+            $("#test3").hide();
+            $("#imgs3").show();
+        } else {
+            $("#test3").show();
+            $("#imgs3").hide();
+        }
+    }
+
+</script>
+<script>
+    //Demo
+    layui.use('form', function () {
+        var form = layui.form;
+
+        
+        form.val('example', {
+            "typeNo": @p.typeNo||""
+        });
+
+        //监听提交
+        form.on('submit(formDemo)', function (data) {
+            //layer.msg(JSON.stringify(data.field));
+            var file = $("#imgsrc1").attr('src');
+            if (file == undefined || file == '') {
+                layer.msg("请上传图片！");
+                return false;
+            }
+            var jsonStr = {
+                no:@p.no,
+                typeNo: data.field.typeNo,
+                name: data.field.name,
+                falsePrice: data.field.falsePrice,
+                price: data.field.price,
+                img1: file,
+                img2: $("#imgsrc2").attr('src'),
+                img3: $("#imgsrc3").attr('src')
+            }
+
+            $.ajax({
+                url:"Save",
+                data: {
+                    JsonModel: encodeURI(JSON.stringify(jsonStr))
+                },
+                success: function (res) {
+                    var msg = JSON.parse(res)._OP_NOTE;
+                    parent.parent.layer.msg(msg);
+                    //parent.layui.table.reload('demo');
+                    parent.parent.refreshTab("商品管理");
+                    if (msg.indexOf("添加") != "-1") {
+                        parent.parent.deleteTabs("添加商品");
+                    } else if (msg.indexOf("修改") != "-1"){
+                        parent.parent.deleteTabs("修改商品");
+                    }
+                    
+                }
+            })
+
+
+            return false;
+        });
+    });
+</script>
+<script>
+    layui.use('upload', function () {
+        var upload = layui.upload;
+
+        //图片1上传
+       @*upload.render({
+            elem: '#test1' //绑定元素
+            , url: 'UploadImg' //上传接口
+            , data: {
+                no: Number(@p.no),
+                del_image_src: '',
+                up_image_src: ''
+            }
+            , done: function (res) {
+                //上传完毕回调
+                //{ "_OP_FLAG": "1", "_OP_NOTE": "{\"code\": \"0\" ,\"msg\": \"上传成功！\",\"data\":{\"src\":\"C:\\bedManage\\types\\IDzm.jpg\"} }", "_DATA": null }
+                res = JSON.parse(res._OP_NOTE);
+                if (res.code == "0") {
+                    layer.msg("上传成功！");
+                    $("#imgsrc1").attr('src', res.data.src);
+                    $("#test1").hide();
+                    $("#imgs1").show();
+                }
+            }
+            , error: function () {
+                //请求异常回调
+                console.log("上传异常！")
+            }
+        });*@
+
+        @*//图片1重新上传
+        upload.render({
+            elem: '#ReloadImg1' //绑定元素
+            , url: 'UploadImg' //上传接口
+            , data: {
+                no: Number(@p.no),
+                imagesrc: function () {
+                    return $("#imgsrc1").attr('src')
+                }
+            }
+            , done: function (res) {
+                //上传完毕回调
+                //{ "_OP_FLAG": "1", "_OP_NOTE": "{\"code\": \"0\" ,\"msg\": \"上传成功！\",\"data\":{\"src\":\"C:\\bedManage\\types\\IDzm.jpg\"} }", "_DATA": null }
+                res = JSON.parse(res._OP_NOTE);
+                if (res.code == "0") {
+                    layer.msg("上传成功！");
+                    $("#imgsrc").attr('src', res.data.src);
+                    $("#test1").hide();
+                    $("#imgs").show();
+                    parent.layui.table.reload('demo');
+                }
+            }
+            , error: function () {
+                //请求异常回调
+                console.log("上传异常！")
+            }
+        });
+
+        //图片2上传
+       upload.render({
+            elem: '#test2' //绑定元素
+            , url: 'UploadImg' //上传接口
+            , data: {
+                no: Number(@p.no),
+                imagesrc: ''
+            }
+            , done: function (res) {
+                //上传完毕回调
+                //{ "_OP_FLAG": "1", "_OP_NOTE": "{\"code\": \"0\" ,\"msg\": \"上传成功！\",\"data\":{\"src\":\"C:\\bedManage\\types\\IDzm.jpg\"} }", "_DATA": null }
+                res = JSON.parse(res._OP_NOTE);
+                if (res.code == "0") {
+                    layer.msg("上传成功！");
+                    $("#imgsrc2").attr('src', res.data.src);
+                    $("#test2").hide();
+                    $("#imgs2").show();
+                }
+            }
+            , error: function () {
+                //请求异常回调
+                console.log("上传异常！")
+            }
+        });
+
+        //图片2重新上传
+       upload.render({
+            elem: '#ReloadImg2' //绑定元素
+            , url: 'UploadImg' //上传接口
+            , data: {
+                no: Number(@p.no),
+                imagesrc: function () {
+                    return $("#imgsrc2").attr('src')
+                }
+            }
+            , done: function (res) {
+                //上传完毕回调
+                //{ "_OP_FLAG": "1", "_OP_NOTE": "{\"code\": \"0\" ,\"msg\": \"上传成功！\",\"data\":{\"src\":\"C:\\bedManage\\types\\IDzm.jpg\"} }", "_DATA": null }
+                res = JSON.parse(res._OP_NOTE);
+                if (res.code == "0") {
+                    layer.msg("上传成功！");
+                    $("#imgsrc2").attr('src', res.data.src);
+                    $("#test2").hide();
+                    $("#imgs2").show();
+                    parent.layui.table.reload('demo');
+                }
+            }
+            , error: function () {
+                //请求异常回调
+                console.log("上传异常！")
+            }
+        });
+
+        //图片3上传
+        upload.render({
+            elem: '#test3' //绑定元素
+            , url: 'UploadImg' //上传接口
+            , data: {
+                no: Number(@p.no),
+                imagesrc: ''
+            }
+            , done: function (res) {
+                //上传完毕回调
+                //{ "_OP_FLAG": "1", "_OP_NOTE": "{\"code\": \"0\" ,\"msg\": \"上传成功！\",\"data\":{\"src\":\"C:\\bedManage\\types\\IDzm.jpg\"} }", "_DATA": null }
+                res = JSON.parse(res._OP_NOTE);
+                if (res.code == "0") {
+                    layer.msg("上传成功！");
+                    $("#imgsrc3").attr('src', res.data.src);
+                    $("#test3").hide();
+                    $("#imgs3").show();
+                }
+            }
+            , error: function () {
+                //请求异常回调
+                console.log("上传异常！")
+            }
+        });
+
+        //图片3重新上传
+        upload.render({
+            elem: '#ReloadImg3' //绑定元素
+            , url: 'UploadImg' //上传接口
+            , data: {
+                no: Number(@p.no),
+                imagesrc: function () {
+                    return $("#imgsrc3").attr('src')
+                }
+            }
+            , done: function (res) {
+                //上传完毕回调
+                //{ "_OP_FLAG": "1", "_OP_NOTE": "{\"code\": \"0\" ,\"msg\": \"上传成功！\",\"data\":{\"src\":\"C:\\bedManage\\types\\IDzm.jpg\"} }", "_DATA": null }
+                res = JSON.parse(res._OP_NOTE);
+                if (res.code == "0") {
+                    layer.msg("上传成功！");
+                    $("#imgsrc3").attr('src', res.data.src);
+                    $("#test3").hide();
+                    $("#imgs3").show();
+                    parent.layui.table.reload('demo');
+                }
+            }
+            , error: function () {
+                //请求异常回调
+                console.log("上传异常！")
+            }
+        });*@
+
+
+    });
+</script>
+@*图片裁剪上传*@
+<script>
+    //上传
+    $("#test1").on("click", function () {
+        layOpen(1);
+    })
+    $("#test2").on("click", function () {
+        layOpen(2);
+    })
+    $("#test3").on("click", function () {
+        layOpen(3);
+    })
+    //重新上传
+    $("#ReloadImg1").on("click", function () {
+        layOpen(1);
+    })
+    $("#ReloadImg2").on("click", function () {
+        layOpen(2);
+    })
+    $("#ReloadImg3").on("click", function () {
+        layOpen(3);
+    })
+    function layOpen(id) {
+        layer.open({
+            title: "",
+            area: ['470px', '500px'],
+            type: 2,
+            offset: '8px',
+            content: ['/Components/cutImage/index.html', 'no'],
+            success: function (layero, index) {
+                var body = layer.getChildFrame('body', index);//少了这个是不能从父页面向子页面传值的
+                //获取子页面的元素，进行数据渲染
+                body.contents().find("#hdIndex").val(id);
+            }
+        });
+    }
+    function bind_img(index, img_url) {
+        //图片正式开始上传
+        $.ajax({
+            type: "post",
+            url: "UploadImg",
+            data: { 'no': Number(@p.no), 'del_image_src': $("#imgsrc"+index).attr('src'), 'up_image_src': img_url },
+            dataType: "text",
+            success: function (res) {
+                res = JSON.parse(res);
+                if (res.code == "1") {
+                    layer.msg("上传成功！");
+                    $("#imgsrc" + index).attr('src', res.src);
+                     $("#test" + index).hide();
+                     $("#imgs" + index).show();
+                }
+            }
+        })
+
+
+    }
+</script>
+
+<style>
+    .layui-form-item {
+        width: 90%;
+    }
+
+    .upload {
+        background: white;
+        border: 2px solid #dfdfdf;
+        padding: 0;
+        width: 60px !important;
+        height: 60px;
+    }
+
+    #imgsrc1, #imgsrc2, #imgsrc3 {
+        width: 60px !important;
+        height: 60px;
+    }
+    
+    #imgs1, #imgs2, #imgs3 {
+        position:relative;
+    }
+    div[id*="imgs"]>i{
+        font-size: 28px !important;
+        color: #e5e1e1 !important;
+        position: absolute !important;
+        left: 15px !important;
+        top: 15px !important;
+    }
+</style>
+

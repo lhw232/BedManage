@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"> 
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>jQuery轻量级拖动剪裁头像图片插件|DEMO_jQuery之家-自由分享jQuery、html5、css3的插件库</title>
+	<link rel="stylesheet" type="text/css" href="css/normalize.css" />
+	<link rel="stylesheet" type="text/css" href="css/htmleaf-demo.css">
+	<link rel="stylesheet" href="css/style.css" type="text/css" />
+</head>
+<body>
+	<div class="htmleaf-container">
+		<div class="container">
+			<input type="hidden" id="hdIndex" />
+			<div class="setting">
+				Width: <input id="imgWidth" type="number" />
+				Height: <input id="imgHeight" type="number" />
+			</div>
+			<div class="imageBox">
+				<div class="thumbBox"></div>
+				<div class="spinner" style="display: none">Loading...</div>
+			</div>
+			<div class="action">
+				<div class="new-contentarea tc">
+					<a href="javascript:void(0)" class="upload-img">
+						<label for="upload-file">上传图像</label>
+					</a>
+					<input type="file" class="" name="upload-file" id="upload-file" />
+				</div>
+				<input type="button" id="btnCrop" class="Btnsty_peyton" value="裁切">
+				<input type="button" id="btnZoomIn" class="Btnsty_peyton" value="+">
+				<input type="button" id="btnZoomOut" class="Btnsty_peyton" value="-">
+			</div>
+			<!--<div class="cropped"></div>-->
+		</div>
+	</div>
+
+	
+	<script src="http://cdn.bootcss.com/jquery/1.11.0/jquery.min.js" type="text/javascript"></script>
+	<script>window.jQuery || document.write('<script src="js/jquery-1.11.0.min.js"><\/script>')</script>
+	<script type="text/javascript" src="js/cropbox.js"></script>
+	<script type="text/javascript">
+		$(window).load(function () {
+			var options =
+			{
+				thumbBox: '.thumbBox',
+				spinner: '.spinner',
+				imgSrc: 'img/avatar.jpg'
+			}
+			var cropper = $('.imageBox').cropbox(options);
+			$('#upload-file').on('change', function () {
+				var reader = new FileReader();
+				reader.onload = function (e) {
+					options.imgSrc = e.target.result;
+					cropper = $('.imageBox').cropbox(options);
+				}
+				reader.readAsDataURL(this.files[0]);
+				this.files = [];
+			})
+			//裁剪
+			$('#btnCrop').on('click', function () {
+				try {
+					var img = cropper.getDataURL();
+					//download(img);
+					var id = $("#hdIndex").val();
+					parent.bind_img(id, img);
+                    parent.layer.close(parent.layer.index);
+
+				} catch {
+					return alert("请上传图像！");
+				}
+			})
+			$('#btnZoomIn').on('click', function () {
+				cropper.zoomIn();
+			})
+			$('#btnZoomOut').on('click', function () {
+				cropper.zoomOut();
+			})
+
+			var scope = {
+				base64: cropper.getDataURL()
+			};
+
+			function download(img) {
+				var date = new Date();
+				if (!img) {
+					return;
+				}
+				var aLink = document.createElement("a"); // 创建一个a标签
+				var blob = base64ToBlob(img);
+				var event = document.createEvent("HTMLEvents");
+				event.initEvent("click", true, true);
+				aLink.download = date.getTime() + "." + blob.type.split("/")[1]; // 使用时间戳给文件命名
+				aLink.href = URL.createObjectURL(blob);
+				aLink.click();
+			}
+			// base64转Blob对象
+			function base64ToBlob(code) {
+				var parts = code.split(";base64,");
+				var contentType = parts[0].split(":")[1];
+				var raw = window.atob(parts[1]);
+				var rawLength = raw.length;
+				var uint8Array = new Uint8Array(rawLength);
+				for (var i = 0; i < rawLength; i++) {
+					uint8Array[i] = raw.charCodeAt(i);
+				}
+				return new Blob([uint8Array], { type: contentType });
+			}
+
+		});
+	</script>
+	<script>
+		$(".thumbBox").css("width", 200);
+		$(".thumbBox").css("height", 200);
+		$(".thumbBox").css("left", 100);
+		$(".thumbBox").css("top", 100);
+		$(".thumbBox").css("margin", 0);
+		$("#imgWidth").val(200);
+		$("#imgHeight").val(200);
+		$("#imgWidth").on("change", function (e) {
+			var val = $(this).val();
+			if (val) {
+				var widthVal = Number(val) + 2;
+				if (widthVal > 400 || widthVal < 2) {
+					alert("超出范围！")
+					return $(this).val("");
+				}
+				$(".thumbBox").css("width", widthVal);
+				$(".thumbBox").css("left", (400 - widthVal) / 2);
+				$(".thumbBox").css("margin", 0);
+			} else {
+				$(".thumbBox").css("width", "198");
+				$(".thumbBox").css("height", "198");
+			}
+		})
+		$("#imgHeight").on("change", function () {
+			var val = $(this).val();
+			if (val) {
+				var heightVal = Number(val) + 2;
+				if (heightVal > 400 || heightVal < 2) {
+					alert("超出范围！")
+					return $(this).val("");
+				}
+				$(".thumbBox").css("height", heightVal);
+				$(".thumbBox").css("top", (400 - heightVal) / 2);
+				$(".thumbBox").css("margin", 0);
+			} else {
+				$(".thumbBox").css("width", "198");
+				$(".thumbBox").css("height", "198");
+			}
+		})
+	</script>
+</body>
+</html>

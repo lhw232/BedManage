@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32407.337
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BedAppManage", "BedAppManage\BedAppManage.csproj", "{6C62AAF4-D4A7-43B3-ADD9-BF7D5FB3E3AF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HW.Utils", "HW.Utils\HW.Utils.csproj", "{A5051F00-FFB3-4DE8-A964-CD2D0AEEF754}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6C62AAF4-D4A7-43B3-ADD9-BF7D5FB3E3AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C62AAF4-D4A7-43B3-ADD9-BF7D5FB3E3AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C62AAF4-D4A7-43B3-ADD9-BF7D5FB3E3AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C62AAF4-D4A7-43B3-ADD9-BF7D5FB3E3AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5051F00-FFB3-4DE8-A964-CD2D0AEEF754}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5051F00-FFB3-4DE8-A964-CD2D0AEEF754}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5051F00-FFB3-4DE8-A964-CD2D0AEEF754}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5051F00-FFB3-4DE8-A964-CD2D0AEEF754}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6A5B162D-F879-44AC-87A2-00A3E5E2AB28}
+	EndGlobalSection
+EndGlobal

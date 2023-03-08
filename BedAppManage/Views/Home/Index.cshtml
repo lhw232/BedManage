@@ -1,0 +1,159 @@
+﻿<style>
+    .layui-tab-title .layui-this {
+        background: #fff;
+    }
+</style>
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo layui-hide-xs layui-bg-black">床上用品管理后台</div>
+        <!-- 头部区域（可配合layui 已有的水平导航） -->
+        <ul class="layui-nav layui-layout-left">
+            <!-- 移动端显示 -->
+            <li class="layui-nav-item layui-show-xs-inline-block layui-hide-sm" lay-header-event="menuLeft">
+                <i class="layui-icon layui-icon-spread-left"></i>
+            </li>
+        </ul>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item layui-hide layui-show-md-inline-block">
+                <a href="javascript:;">
+                    <img src="//tva1.sinaimg.cn/crop.0.0.118.118.180/5db11ff4gw1e77d3nqrv8j203b03cweg.jpg" class="layui-nav-img">
+                    <span id="username"></span>
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="/Home/Login">退出登录</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item" lay-header-event="menuRight" lay-unselect>
+                <a href="javascript:;">
+                    <i class="layui-icon layui-icon-more-vertical"></i>
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree" id="menu" lay-filter="test">
+                <li class="layui-nav-item layui-this"><a href="javascript:;">分类管理</a></li>
+                <li class="layui-nav-item"><a href="javascript:;">商品管理</a></li>
+                <li class="layui-nav-item"><a href="javascript:;">轮播图</a></li>
+                <li class="layui-nav-item"><a href="javascript:;">订单管理</a></li>
+                <li class="layui-nav-item"><a href="javascript:;">用户管理</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-body" style="padding-bottom:0;overflow:hidden;">
+        <div class="layui-tab" lay-allowClose="true" lay-filter="tabMenu">
+            <ul class="layui-tab-title layui-this" >
+                <li class="layui-this" lay-id="分类管理">分类管理</li>
+            </ul>
+            <div class="layui-tab-content">
+                <div class="layui-tab-item layui-show">
+                    <iframe id="iframe" style="width: 100%;height:100%; border: none;" src="/Type/List"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let element;
+    //JS
+    layui.use(['element', 'layer', 'util'], function () {
+         element = layui.element
+            , layer = layui.layer
+            , util = layui.util
+            , $ = layui.$;
+
+        //头部事件
+        util.event('lay-header-event', {
+            //左侧菜单事件
+            menuLeft: function (othis) {
+                layer.msg('展开左侧菜单的操作', { icon: 0 });
+            }
+            , menuRight: function () {
+                layer.open({
+                    type: 1
+                    , content: '<div style="padding: 15px;">处理右侧面板的操作</div>'
+                    , area: ['260px', '100%']
+                    , offset: 'rt' //右上角
+                    , anim: 5
+                    , shadeClose: true
+                });
+            }
+        });
+
+    });
+    let Element;
+    layui.use('element', function () {
+        Element = layui.element;
+
+        //一些事件触发
+        Element.on('tab(tabMenu)', function (data) {
+            console.log(data);
+        });
+    });
+    var myMsg;
+    $("ul#menu").on("click", "li", function (e) {
+        myMsg = layer.msg("加载中...", {
+            icon: 16,
+            time: -1
+        })
+
+        var index = $(this).index();//获取当前点击的li是ul中的第几个
+        if (index == 0) {
+            OpenTabs("分类管理","/Type/List","分类管理");
+        } else if (index == 1) {
+            OpenTabs("商品管理", "/Goods/List", "商品管理");
+        } else if (index == 2) {
+            OpenTabs("轮播图", "/Lunbo/List", "轮播图");
+        } else if (index == 3) {
+            OpenTabs("订单管理", "/Order/List", "订单管理");
+        } else if (index == 4) {
+            OpenTabs("用户管理", "/Members/List", "用户管理");
+        }
+       
+        $(".layui-tab-item #iframe").on("load",function () {
+            layer.close(myMsg);
+        })
+
+    });
+    function deleteTabs(id) {
+        Element.tabDelete('tabMenu', id);
+    }
+    function refreshTab (id){ //刷新页面
+        $("iframe[data-frameid='" + id + "']").attr("src", $("iframe[data-frameid='" + id + "']").attr("src")) //刷新框架
+    }
+    function OpenTabs(title, url, id) {
+        let $node = $("li[lay-id='" + id + "']");
+        if ($node.length == 0) {
+            Element.tabAdd('tabMenu', {
+                title: title
+                , content: '<iframe data-frameid="'+id+'" id="iframe" style="width: 100%;height:100%; border: none;" src="' + url + '"></iframe>' //支持传入html
+                , id: id
+            });
+            Element.tabChange("tabMenu", id);
+            $(".layui-tab-item").css("height", "91vh")
+            $(".layui-tab-content").css("padding", "0")
+        } else {
+            Element.tabChange("tabMenu", id);
+            layer.close(myMsg);
+        }
+        
+    }
+
+    
+</script>
+<script>
+    $(function () {
+        Element.tabChange("tabMenu", "分类管理");
+        $(".layui-tab-item").css("height", "91vh")
+        $(".layui-tab-content").css("padding", "0")
+        var UserName = window.localStorage.getItem("UserName") || "";
+        if (UserName) {
+            $("#username").text(UserName);
+        }
+
+    })
+</script>
